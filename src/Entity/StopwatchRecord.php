@@ -2,12 +2,14 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Repository\StopwatchRecordRepository;
 use App\Traits\TimestampAbleTrait;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: StopwatchRecordRepository::class)]
 #[ORM\HasLifecycleCallbacks]
+#[ApiResource]
 class StopwatchRecord
 {
     use TimestampAbleTrait;

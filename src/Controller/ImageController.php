@@ -8,12 +8,12 @@ use Symfony\Component\Routing\Annotation\Route;
 use thiagoalessio\TesseractOCR\TesseractOCR;
 use thiagoalessio\TesseractOCR\TesseractOcrException;
 
-class IndexController extends AbstractController
+class ImageController extends AbstractController
 {
     /**
      * @throws TesseractOcrException
      */
-    #[Route('/', name: 'app_index')]
+    #[Route('/api/_action/image', name: 'app_image_index')]
     public function index(): Response
     {
         // $image = 'stoppuhr.jpeg';
