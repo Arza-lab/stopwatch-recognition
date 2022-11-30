@@ -58,10 +58,21 @@ class ImageController extends AbstractController
 
     #[Route('/api/_action/image/test', name: 'app_image_test')]
     public function test(): void
-    {
-        $interpreter = $this->getInterpreterWithImage('stoppuhr.jpeg');
+    {   
+        
+        $interpreter= $this->getInterpreterWithImage('digitale-stopp-uhr-stoppuhr_2.jpeg');
+        dd($interpreter
+        ->lang('lets')
+        //->userPatterns('C:/Schuljahr_3_OSZ_IMT/LF12a/stopwatch-recognition/public/userPatterns.txt')
+        //->digits()
+        ->allowlist(range(0,9),":")
+        ->run()
+        );
+      
+       
         try {
-            $interpreter->run();
+           
+            
         } catch (TesseractOcrException $e) {
         }
     }
