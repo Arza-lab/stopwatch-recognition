@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\StopwatchRecordRepository;
+use App\Traits\ExtendableTrait;
 use App\Traits\TimestampAbleTrait;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -13,6 +14,8 @@ use Doctrine\ORM\Mapping as ORM;
 class StopwatchRecord
 {
     use TimestampAbleTrait;
+
+    use ExtendableTrait;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
