@@ -59,15 +59,23 @@ class ImageController extends AbstractController
     #[Route('/api/_action/image/test', name: 'app_image_test')]
     public function test(): void
     {   
-        
-        $interpreter= $this->getInterpreterWithImage('digitale-stopp-uhr-stoppuhr_2.jpeg');
-        dd($interpreter
+        //digitale-stopp-uhr-stoppuhr
+        $interpreter= $this->getInterpreterWithImage('digitale-stopp-uhr-stoppuhr_cropped.jpeg');
+        $text = $interpreter
         ->lang('lets')
         //->userPatterns('C:/Schuljahr_3_OSZ_IMT/LF12a/stopwatch-recognition/public/userPatterns.txt')
         //->digits()
-        ->allowlist(range(0,9),":")
-        ->run()
-        );
+        ->allowlist(range(0,9),":",",",";")
+        ->run();
+
+        
+        
+        $text = str_replace(",", "", $text);
+        $text = strrev(chunk_split(strrev($text), 2, ':'));
+        if ($text[0] == ':') {
+            $text = substr($text, 1);
+        }
+        dd($text);
       
        
         try {
