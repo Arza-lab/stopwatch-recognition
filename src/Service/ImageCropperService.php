@@ -17,7 +17,7 @@ class ImageCropperService
         ],
     ];
 
-    public function processImage(string $imagePath): void
+    public function processImage(string $imagePath): string
     {
         $image = $this->createImageFromPath($imagePath);
         $dimensions = $this->getImageDimensions($image);
@@ -29,7 +29,10 @@ class ImageCropperService
         $cropRectangle = $this->determineCropRectangle($pixels);
         $croppedImage = $this->cropImage($image, $cropRectangle);
 
+        $imagePath = $this->addFileSuffix($imagePath);
         $this->saveImage($croppedImage, $imagePath);
+
+        return $imagePath;
     }
 
     private function createImageFromPath(string $imagePath): \GdImage
@@ -68,7 +71,30 @@ class ImageCropperService
             }
         }
 
-        return $pixels;
+        return $this->filterPixels($pixels);
+    }
+
+    private function filterPixels(array $pixels): array
+    {
+        return array_filter($pixels, function ($value) use ($pixels) {
+            $val = explode('/', $value, 2);
+            $x = $val[0];
+            $y = $val[1];
+            $valuesToCheck = [($x + 1).'/'.$y, ($x + 2).'/'.$y, $x.'/'.($y + 1), $x.'/'.($y + 2), ($x + 1).'/'.($y + 1), ($x + 2).'/'.($y + 2),
+                ($x - 1).'/'.$y, ($x - 2).'/'.$y, $x.'/'.($y - 1), $x.'/'.($y - 2), ($x - 1).'/'.($y - 1), ($x - 2).'/'.($y - 2), ];
+
+            $checks = [];
+            foreach ($valuesToCheck as $value) {
+                if (in_array($value, $pixels)) {
+                    $checks[] = $value;
+                }
+                if (count($checks) >= 3) {
+                    break;
+                }
+            }
+
+            return count($checks) >= 3;
+        });
     }
 
     private function hasNeighbour(array $pixels, string $pixel): bool
@@ -115,7 +141,7 @@ class ImageCropperService
         $x = [];
         $y = [];
         foreach ($pixels as $pixel) {
-            $pixelCoordinates = explode('/', $pixel);
+            $pixelCoordinates = explode('/', $pixel, 2);
             $x[] = $pixelCoordinates[0];
             $y[] = $pixelCoordinates[1];
         }
@@ -127,16 +153,18 @@ class ImageCropperService
         return [
             'x' => $xMin,
             'y' => $yMin,
-            'width' => $xMax - $xMin,
-            'height' => $yMax - $yMin,
+            'width' => ($xMax - $xMin) + 5,
+            'height' => ($yMax - $yMin) + 10,
         ];
     }
 
     private function saveImage(\GdImage $croppedImage, string $imagePath): void
     {
-        // add a suffix to the filename
-        $imagePath = preg_replace('/(\.[a-z]+)$/', '_cropped$1', $imagePath);
-
         imagejpeg($croppedImage, $imagePath);
+    }
+
+    private function addFileSuffix(string $imagePath): string
+    {
+        return preg_replace('/(\.[a-z]+)$/', '_cropped$1', $imagePath);
     }
 }
