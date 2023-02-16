@@ -78,8 +78,8 @@ class ImageCropperService
     {
         return array_filter($pixels, function ($value) use ($pixels) {
             $val = explode('/', $value, 2);
-            $x = $val[0];
-            $y = $val[1];
+            $x = (int) $val[0];
+            $y = (int) $val[1];
             $valuesToCheck = [($x + 1).'/'.$y, ($x + 2).'/'.$y, $x.'/'.($y + 1), $x.'/'.($y + 2), ($x + 1).'/'.($y + 1), ($x + 2).'/'.($y + 2),
                 ($x - 1).'/'.$y, ($x - 2).'/'.$y, $x.'/'.($y - 1), $x.'/'.($y - 2), ($x - 1).'/'.($y - 1), ($x - 2).'/'.($y - 2), ];
 
@@ -110,6 +110,26 @@ class ImageCropperService
         ];
 
         return count(array_intersect($pixels, $neighbours)) > 0;
+    }
+
+    private function buildCluster(array $pixels, string $pixel): array
+    {
+        $cluster = [$pixel];
+        $pixelCoordinates = explode('/', $pixel);
+        $x = $pixelCoordinates[0];
+        $y = $pixelCoordinates[1];
+        $neighbours = [
+            "$x/$y",
+            "$x/$y",
+            "$x/$y",
+            "$x/$y",
+        ];
+        $neighbours = array_intersect($pixels, $neighbours);
+        foreach ($neighbours as $neighbour) {
+            $cluster = array_merge($cluster, $this->buildCluster($pixels, $neighbour));
+        }
+
+        return $cluster;
     }
 
     private function removeExceptions(array $pixels): array
