@@ -1,11 +1,18 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello FrontendController!{% endblock %}
+{% block title %}Stoppuhr erkennung{% endblock %}
 
 {% block body %}
 
 <div>
-    {{ form_start(form) }}
+    <div>
+        <h1> Stoppuhr erkennung</h1>
+    </div>
+    {{ form_start(form, {
+        'attr': {
+            'class': 'image-form',
+        }
+    }) }}
     {{ form_widget(form) }}
     {{ form_end(form) }}
 </div>

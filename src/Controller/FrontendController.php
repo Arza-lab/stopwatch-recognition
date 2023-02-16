@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Form\ImageType;
+use App\Service\ImageCropperService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -10,23 +11,15 @@ use Symfony\Component\Routing\Annotation\Route;
 class FrontendController extends AbstractController
 {
     #[Route('/', name: 'app_frontend')]
-    public function index(ImageCropper $imageCropper): Response
+    public function index(ImageCropperService $imageCropperService): Response
     {
-        $imageCropper->setImageData('digitale-stopp-uhr-stoppuhr.jpeg')->cropImage();
-        $imageCropper->showInBrowser();
-        $imageCropper->showInConsole();
+        // $imageCropperService->processImage('digitale-stopp-uhr-stoppuhr.jpeg');
 
-        exit;
-
-        return $this->render('frontend/index.html.twig', [
-            'controller_name' => 'FrontendController',
-        ]);
-    }
-
-    #[Route('/form', name: 'app_frontend_form')]
-    public function form(): Response
-    {
-        $form = $this->createForm(ImageType::class);
+        $form = $this->createForm(ImageType::class, null,
+            [
+                'action' => $this->generateUrl('app_image_index'),
+            ]
+        );
 
         return $this->render('frontend/index.html.twig', [
             'form' => $form->createView(),

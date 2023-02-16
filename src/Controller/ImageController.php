@@ -4,9 +4,10 @@ namespace App\Controller;
 
 use App\Entity\StopwatchRecord;
 use App\Repository\StopwatchRecordRepository;
+use App\Service\ImageCropperService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\FileBag;
-use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use thiagoalessio\TesseractOCR\TesseractOCR;
@@ -15,10 +16,11 @@ use thiagoalessio\TesseractOCR\TesseractOcrException;
 class ImageController extends AbstractController
 {
     #[Route('/api/_action/image', name: 'app_image_index', methods: ['POST'])]
-    public function index(FileBag $fileBag, ParameterBag $parameterBag, StopwatchRecordRepository $stopwatchRecordRepository): Response
+    public function index(Request $request, StopwatchRecordRepository $stopwatchRecordRepository): Response
     {
-        $file = $fileBag->get('file');
-        $lang = $parameterBag->get('lang', 'eng');
+        $files = $request->files;
+        /** @var UploadedFile $file */
+        $file = $files->get('image')['file'];
 
         $ocr = $this->getInterpreterWithImage($file->getPathname());
 
@@ -48,7 +50,9 @@ class ImageController extends AbstractController
 
     private function getInterpreter(): TesseractOCR
     {
-        return (new TesseractOCR())->psm(11);
+        return (new TesseractOCR())
+            ->psm(11)
+            ->lang('lets');
     }
 
     private function getInterpreterWithImage(string $image): TesseractOCR
@@ -57,31 +61,19 @@ class ImageController extends AbstractController
     }
 
     #[Route('/api/_action/image/test', name: 'app_image_test')]
-    public function test(): void
-    {   
-        //digitale-stopp-uhr-stoppuhr
-        $interpreter= $this->getInterpreterWithImage('digitale-stopp-uhr-stoppuhr_cropped.jpeg');
-        $text = $interpreter
-        ->lang('lets')
-        //->userPatterns('C:/Schuljahr_3_OSZ_IMT/LF12a/stopwatch-recognition/public/userPatterns.txt')
-        //->digits()
-        ->allowlist(range(0,9),":",",",";")
-        ->run();
+    public function test(ImageCropperService $imageCropperService): void
+    {
+        $filePath = 'testbilder/20221128_114836_gray.jpg';
+        $filePath = $imageCropperService->processImage($filePath);
+        // digitale-stopp-uhr-stoppuhr
 
-        
-        
-        $text = str_replace(",", "", $text);
-        $text = strrev(chunk_split(strrev($text), 2, ':'));
-        if ($text[0] == ':') {
-            $text = substr($text, 1);
-        }
+        $interpreter = $this->getInterpreterWithImage($filePath);
+        $text = $interpreter
+            ->lang('lets')
+            ->psm(11)
+            ->digits()
+            ->run();
+
         dd($text);
-      
-       
-        try {
-           
-            
-        } catch (TesseractOcrException $e) {
-        }
     }
 }
